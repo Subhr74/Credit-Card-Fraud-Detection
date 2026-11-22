@@ -1,0 +1,358 @@
+{
+  "models": [
+    {
+      "name": "Isolation Forest",
+      "precision": 0.1518,
+      "recall": 0.1441,
+      "f1": 0.1478,
+      "roc_auc": 0.9448,
+      "pr_auc": 0.0827,
+      "tn": 70719,
+      "fp": 95,
+      "fn": 101,
+      "tp": 17,
+      "fraud_caught_pct": 14.41,
+      "false_alarm_rate_pct": 0.1342,
+      "seconds": 4.31,
+      "cv_f1_mean": null,
+      "cv_f1_std": null
+    },
+    {
+      "name": "Random Forest",
+      "precision": 0.8835,
+      "recall": 0.7712,
+      "f1": 0.8235,
+      "roc_auc": 0.9788,
+      "pr_auc": 0.8219,
+      "tn": 70802,
+      "fp": 12,
+      "fn": 27,
+      "tp": 91,
+      "fraud_caught_pct": 77.12,
+      "false_alarm_rate_pct": 0.0169,
+      "seconds": 134.61,
+      "cv_f1_mean": 0.9714,
+      "cv_f1_std": 0.0057
+    },
+    {
+      "name": "XGBoost",
+      "precision": 0.6169,
+      "recall": 0.8051,
+      "f1": 0.6985,
+      "roc_auc": 0.9802,
+      "pr_auc": 0.7816,
+      "tn": 70755,
+      "fp": 59,
+      "fn": 23,
+      "tp": 95,
+      "fraud_caught_pct": 80.51,
+      "false_alarm_rate_pct": 0.0833,
+      "seconds": 11.54,
+      "cv_f1_mean": 0.9439,
+      "cv_f1_std": 0.0067
+    }
+  ],
+  "best": "Random Forest",
+  "headline_metric_explanation": "Accuracy is intentionally omitted as a headline metric because in a dataset with 99.83% legitimate transactions, a naive dummy model predicting 'Legitimate' 100% of the time achieves 99.83% accuracy while missing every single fraud incident ($0 caught). Production fraud systems evaluate Precision, Recall, F1-Score, and PR-AUC.",
+  "importance": [
+    [
+      "V10",
+      0.17287551743765883
+    ],
+    [
+      "V14",
+      0.16233134463629575
+    ],
+    [
+      "V12",
+      0.11191410546460866
+    ],
+    [
+      "V11",
+      0.09738015555931223
+    ],
+    [
+      "V17",
+      0.08240659774265414
+    ],
+    [
+      "V16",
+      0.07363222133403809
+    ],
+    [
+      "V4",
+      0.06518939104718192
+    ],
+    [
+      "V7",
+      0.046980277651523863
+    ],
+    [
+      "V3",
+      0.03867140805800617
+    ],
+    [
+      "V2",
+      0.01898728332231971
+    ],
+    [
+      "V18",
+      0.014645657286616848
+    ],
+    [
+      "V9",
+      0.013057633180299552
+    ]
+  ],
+  "threshold_curve": [
+    {
+      "threshold": 0.05,
+      "precision": 0.0735,
+      "recall": 0.8983,
+      "f1": 0.1359,
+      "tp_caught": 106,
+      "fp_false_alarms": 1336,
+      "fn_missed": 12,
+      "fraud_caught_pct": 89.83,
+      "cost_score": 19360
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.2166,
+      "recall": 0.8644,
+      "f1": 0.3463,
+      "tp_caught": 102,
+      "fp_false_alarms": 369,
+      "fn_missed": 16,
+      "fraud_caught_pct": 86.44,
+      "cost_score": 11690
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.387,
+      "recall": 0.8559,
+      "f1": 0.533,
+      "tp_caught": 101,
+      "fp_false_alarms": 160,
+      "fn_missed": 17,
+      "fraud_caught_pct": 85.59,
+      "cost_score": 10100
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.5568,
+      "recall": 0.8305,
+      "f1": 0.6667,
+      "tp_caught": 98,
+      "fp_false_alarms": 78,
+      "fn_missed": 20,
+      "fraud_caught_pct": 83.05,
+      "cost_score": 10780
+    },
+    {
+      "threshold": 0.25,
+      "precision": 0.6901,
+      "recall": 0.8305,
+      "f1": 0.7538,
+      "tp_caught": 98,
+      "fp_false_alarms": 44,
+      "fn_missed": 20,
+      "fraud_caught_pct": 83.05,
+      "cost_score": 10440
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.7638,
+      "recall": 0.822,
+      "f1": 0.7918,
+      "tp_caught": 97,
+      "fp_false_alarms": 30,
+      "fn_missed": 21,
+      "fraud_caught_pct": 82.2,
+      "cost_score": 10800
+    },
+    {
+      "threshold": 0.35,
+      "precision": 0.8067,
+      "recall": 0.8136,
+      "f1": 0.8101,
+      "tp_caught": 96,
+      "fp_false_alarms": 23,
+      "fn_missed": 22,
+      "fraud_caught_pct": 81.36,
+      "cost_score": 11230
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.8319,
+      "recall": 0.7966,
+      "f1": 0.8139,
+      "tp_caught": 94,
+      "fp_false_alarms": 19,
+      "fn_missed": 24,
+      "fraud_caught_pct": 79.66,
+      "cost_score": 12190
+    },
+    {
+      "threshold": 0.45,
+      "precision": 0.844,
+      "recall": 0.7797,
+      "f1": 0.8106,
+      "tp_caught": 92,
+      "fp_false_alarms": 17,
+      "fn_missed": 26,
+      "fraud_caught_pct": 77.97,
+      "cost_score": 13170
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.8835,
+      "recall": 0.7712,
+      "f1": 0.8235,
+      "tp_caught": 91,
+      "fp_false_alarms": 12,
+      "fn_missed": 27,
+      "fraud_caught_pct": 77.12,
+      "cost_score": 13620
+    },
+    {
+      "threshold": 0.55,
+      "precision": 0.9091,
+      "recall": 0.7627,
+      "f1": 0.8295,
+      "tp_caught": 90,
+      "fp_false_alarms": 9,
+      "fn_missed": 28,
+      "fraud_caught_pct": 76.27,
+      "cost_score": 14090
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.9091,
+      "recall": 0.7627,
+      "f1": 0.8295,
+      "tp_caught": 90,
+      "fp_false_alarms": 9,
+      "fn_missed": 28,
+      "fraud_caught_pct": 76.27,
+      "cost_score": 14090
+    },
+    {
+      "threshold": 0.65,
+      "precision": 0.9263,
+      "recall": 0.7458,
+      "f1": 0.8263,
+      "tp_caught": 88,
+      "fp_false_alarms": 7,
+      "fn_missed": 30,
+      "fraud_caught_pct": 74.58,
+      "cost_score": 15070
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.9565,
+      "recall": 0.7458,
+      "f1": 0.8381,
+      "tp_caught": 88,
+      "fp_false_alarms": 4,
+      "fn_missed": 30,
+      "fraud_caught_pct": 74.58,
+      "cost_score": 15040
+    },
+    {
+      "threshold": 0.75,
+      "precision": 0.956,
+      "recall": 0.7373,
+      "f1": 0.8325,
+      "tp_caught": 87,
+      "fp_false_alarms": 4,
+      "fn_missed": 31,
+      "fraud_caught_pct": 73.73,
+      "cost_score": 15540
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.9655,
+      "recall": 0.7119,
+      "f1": 0.8195,
+      "tp_caught": 84,
+      "fp_false_alarms": 3,
+      "fn_missed": 34,
+      "fraud_caught_pct": 71.19,
+      "cost_score": 17030
+    },
+    {
+      "threshold": 0.85,
+      "precision": 0.9647,
+      "recall": 0.6949,
+      "f1": 0.8079,
+      "tp_caught": 82,
+      "fp_false_alarms": 3,
+      "fn_missed": 36,
+      "fraud_caught_pct": 69.49,
+      "cost_score": 18030
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.9625,
+      "recall": 0.6525,
+      "f1": 0.7778,
+      "tp_caught": 77,
+      "fp_false_alarms": 3,
+      "fn_missed": 41,
+      "fraud_caught_pct": 65.25,
+      "cost_score": 20530
+    }
+  ],
+  "clustering": [
+    {
+      "cluster_id": 3,
+      "name": "High-Value Commercial Spending",
+      "txn_count": 22556,
+      "txn_share_pct": 7.95,
+      "fraud_count": 125,
+      "fraud_rate_pct": 0.554,
+      "avg_amount": 55.38,
+      "mean_v14": 1.1489,
+      "mean_v10": -0.3338,
+      "risk_index": 3.32
+    },
+    {
+      "cluster_id": 2,
+      "name": "Moderate Evening Commerce",
+      "txn_count": 4160,
+      "txn_share_pct": 1.47,
+      "fraud_count": 13,
+      "fraud_rate_pct": 0.312,
+      "avg_amount": 1544.6,
+      "mean_v14": 0.2689,
+      "mean_v10": -0.7029,
+      "risk_index": 1.87
+    },
+    {
+      "cluster_id": 1,
+      "name": "High-Variance / Anomaly Profile",
+      "txn_count": 123655,
+      "txn_share_pct": 43.58,
+      "fraud_count": 212,
+      "fraud_rate_pct": 0.171,
+      "avg_amount": 66.86,
+      "mean_v14": -0.147,
+      "mean_v10": 0.0626,
+      "risk_index": 1.03
+    },
+    {
+      "cluster_id": 0,
+      "name": "Routine Daytime Micro-transactions",
+      "txn_count": 133355,
+      "txn_share_pct": 47.0,
+      "fraud_count": 123,
+      "fraud_rate_pct": 0.092,
+      "avg_amount": 68.69,
+      "mean_v14": -0.0658,
+      "mean_v10": 0.0173,
+      "risk_index": 0.55
+    }
+  ],
+  "trained_at": "2026-11-17 01:26:32"
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Credit Card Fraud Detection – Real-Time Analytics Portal</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+  <!-- Top Global Navigation Header -->
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div class="brand-text">
+        <h1>Credit Card Fraud Detection</h1>
+        <p>Real-Time Analytics & Risk Monitoring</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div id="streamBadge" class="badge live">
+        <span class="dot"></span>
+        <span id="streamStatusText">Streaming Live (1.0s)</span>
+      </div>
+      <div class="badge" id="deployedModelBadge">Model: Random Forest</div>
+
+      <button id="themeToggle" class="icon-btn" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">☀️</span> Light
+      </button>
+    </div>
+  </header>
+
+  <!-- Clean 4 Navigation Tabs (Warehouse Schema, OLAP, and Model Comparison removed) -->
+  <nav class="site-nav" role="tablist">
+    <button class="nav-tab active" data-target="livePane" role="tab">⚡ 1. Real-Time Live Tracking</button>
+    <button class="nav-tab" data-target="overviewPane" role="tab">📊 2. Portfolio Overview & KPIs</button>
+    <button class="nav-tab" data-target="predictPane" role="tab">🎯 3. Screen a Transaction</button>
+    <button class="nav-tab" data-target="reviewPane" role="tab">📝 4. Analyst Review Queue</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- Global Notice for Dataset & Simulated Dimensions -->
+    <div class="sim-banner">
+      <span>ℹ️</span>
+      <div>
+        <strong>Dataset Info:</strong> Features V1–V28, Time, Amount, and Class originate from the Kaggle ULB dataset (284,807 transactions). 
+        Merchant categories and Card types are simulated with fixed seed (seed=42) for realistic real-time transaction tracking.
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         PAGE 1: REAL-TIME LIVE TRACKING (PRIMARY MONITOR)
+         ==================================================================== -->
+    <section id="livePane" class="tab-pane active" role="tabpanel">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Real-Time Live Transaction Monitor</h2>
+          <p>Continuous transaction stream evaluated in real-time by the deployed machine learning model.</p>
+        </div>
+        <div class="form-row" style="margin-bottom:0; align-items:center;">
+          <button id="toggleStreamBtn" class="btn danger">⏸️ Pause Stream</button>
+          <div class="form-group" style="margin-bottom:0;">
+            <select id="streamIntervalSelect">
+              <option value="0.5">⚡ 0.5s (High Speed)</option>
+              <option value="1.0" selected>⏱️ 1.0s (Live Real-Time)</option>
+              <option value="2.0">🐢 2.0s (Normal)</option>
+            </select>
+          </div>
+          <button id="clearStreamBtn" class="btn secondary">🧹 Clear Feeds</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Metrics Bar -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Live Stream Processed <span>⚡</span></div>
+          <div class="kpi-value" id="liveProcessedCount">0</div>
+          <div class="kpi-sub" id="liveTps">Throughput: ~1.0 txns/sec</div>
+        </div>
+        <div class="kpi-card fraud">
+          <div class="kpi-label">Fraud Incidents Flagged <span>🚨</span></div>
+          <div class="kpi-value" id="liveFraudCount">0</div>
+          <div class="kpi-sub" id="liveFraudRate">Session Fraud Rate: 0.0%</div>
+        </div>
+        <div class="kpi-card warning">
+          <div class="kpi-label">Blocked Fraud Amount <span>💰</span></div>
+          <div class="kpi-value" id="liveBlockedAmount">$0.00</div>
+          <div class="kpi-sub">Prevented Loss</div>
+        </div>
+        <div class="kpi-card success">
+          <div class="kpi-label">System Health & Latency <span>🛡️</span></div>
+          <div class="kpi-value" id="liveLatency">&lt; 15 ms</div>
+          <div class="kpi-sub">Inference Engine: Active</div>
+        </div>
+      </div>
+
+      <!-- Real-Time Rolling Probability Sparkline Chart -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Real-Time Rolling Fraud Probability (Last 30 Events)</h3>
+          <span class="badge live" id="liveEventCount">0 events received</span>
+        </div>
+        <canvas id="rollingRateChart" height="95"></canvas>
+      </div>
+
+      <!-- Live Split Feeds: Stream & High-Risk Alerts -->
+      <div class="grid-2">
+        <!-- Live Incoming Transactions Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Live Transaction Feed</h3>
+            <span class="badge live">SSE Live Stream</span>
+          </div>
+          <div class="stream-box" id="liveStreamFeed">
+            <div style="color:var(--text-muted); padding:20px; text-align:center;">
+              Connecting to live real-time stream...
+            </div>
+          </div>
+        </div>
+
+        <!-- High-Risk Suspicious Alerts Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">High-Risk Suspicious Alerts Feed (P &ge; 0.50)</h3>
+            <span class="badge fraud" id="alertCountBadge">0 Alerts</span>
+          </div>
+          <div class="stream-box" id="liveAlertsFeed">
+            <div style="color:var(--text-muted); padding:20px; text-align:center;">
+              Monitoring incoming stream. High-risk transactions will appear here instantly.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PAGE 2: PORTFOLIO OVERVIEW & KPIS
+         ==================================================================== -->
+    <section id="overviewPane" class="tab-pane" role="tabpanel">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Portfolio Fraud Overview</h2>
+          <p>Portfolio-wide metrics, temporal risk profiles, and warehouse ingestion status.</p>
+        </div>
+        <button id="refreshKpiBtn" class="btn secondary">🔄 Refresh KPIs</button>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Transactions <span>💳</span></div>
+          <div class="kpi-value" id="kpiTotalTxns">--</div>
+          <div class="kpi-sub">Cleaned Data Warehouse</div>
+        </div>
+        <div class="kpi-card fraud">
+          <div class="kpi-label">Fraudulent Transactions <span>⚠️</span></div>
+          <div class="kpi-value" id="kpiFraudTxns">--</div>
+          <div class="kpi-sub" id="kpiFraudRate">Rate: --%</div>
+        </div>
+        <div class="kpi-card warning">
+          <div class="kpi-label">Amount at Risk <span>💰</span></div>
+          <div class="kpi-value" id="kpiAmountAtRisk">$--</div>
+          <div class="kpi-sub" id="kpiTotalAmount">Total Volume: $--</div>
+        </div>
+        <div class="kpi-card success">
+          <div class="kpi-label">Average Transaction <span>🏷️</span></div>
+          <div class="kpi-value" id="kpiAvgAmount">$--</div>
+          <div class="kpi-sub" id="kpiMaxAmount">Max: $--</div>
+        </div>
+      </div>
+
+      <!-- Temporal Risk Distribution Charts -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Fraud Rate by Time of Day</h3>
+            <span class="badge">Period of Day</span>
+          </div>
+          <canvas id="periodChart" height="150"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Hourly Fraud Volume Distribution</h3>
+            <span class="badge">0 - 23 Hours</span>
+          </div>
+          <canvas id="hourlyChart" height="150"></canvas>
+        </div>
+      </div>
+
+      <!-- ETL Execution History Table -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Warehouse Ingestion Log (etl_run_log)</h3>
+          <button id="triggerEtlBtn" class="btn secondary">⚡ Trigger ETL Run</button>
+        </div>
+        <div class="table-responsive">
+          <table id="etlHistoryTable">
+            <thead>
+              <tr>
+                <th>Run ID</th>
+                <th>Timestamp</th>
+                <th>Status</th>
+                <th>Extracted</th>
+                <th>Loaded</th>
+                <th>Rejected</th>
+                <th>Frauds</th>
+                <th>Duration</th>
+                <th>Quality Sanity</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" style="text-align:center;">Loading ETL execution history...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PAGE 3: CHECK A TRANSACTION (INFERENCE & SHAP)
+         ==================================================================== -->
+    <section id="predictPane" class="tab-pane" role="tabpanel">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Check a Transaction (Inference & Explainability)</h2>
+          <p>Screen individual transaction parameters, test decision thresholds, and inspect SHAP feature attributions.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Transaction Input Features</h3>
+          <div class="form-row" style="margin-bottom:0;">
+            <button id="loadLegitSampleBtn" class="btn secondary">🟢 Load Legitimate Sample</button>
+            <button id="loadFraudSampleBtn" class="btn secondary">🔴 Load Fraud Sample</button>
+          </div>
+        </div>
+
+        <form id="predictForm">
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label for="txnAmount">Amount ($)</label>
+              <input type="number" id="txnAmount" step="0.01" min="0" value="149.50" required />
+            </div>
+
+            <div class="form-group" style="flex:1;">
+              <label for="predictThreshold">Screening Decision Cutoff: <span id="cutoffValueDisplay">0.50</span></label>
+              <input type="range" id="predictThreshold" min="0.05" max="0.95" step="0.05" value="0.50" />
+            </div>
+          </div>
+
+          <div style="margin: 16px 0 8px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">
+              Key PCA Components (V1–V28):
+            </label>
+          </div>
+          
+          <div id="pcaInputsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px;"></div>
+
+          <div style="margin-top:20px;">
+            <button type="submit" class="btn" style="padding:10px 24px; font-size:15px;">🔍 Screen Transaction</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Real-time Scoring Result Panel -->
+      <div class="panel" id="predictionResultPanel" style="display:none;">
+        <div class="panel-header">
+          <h3 class="panel-title">Screening Verdict & Explainability</h3>
+          <span class="badge" id="riskTierBadge">TIER: --</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card" id="verdictCard">
+            <div class="kpi-label">Verdict</div>
+            <div class="kpi-value" id="verdictLabel">--</div>
+            <div class="kpi-sub" id="verdictSub">Scored by Random Forest</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Fraud Probability</div>
+            <div class="kpi-value" id="verdictProb">--%</div>
+            <div class="kpi-sub" id="verdictThreshold">Cutoff: 0.50</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Transaction Amount</div>
+            <div class="kpi-value" id="verdictAmount">$--</div>
+            <div class="kpi-sub">Standard Scaled</div>
+          </div>
+        </div>
+
+        <!-- SHAP Explanation Visualizer -->
+        <div style="margin-top:20px;">
+          <h4 style="font-size:14px; font-weight:600; margin-bottom:8px;">
+            SHAP Feature Attributions (Why this transaction was flagged)
+          </h4>
+          <p style="font-size:12px; color:var(--text-muted);">
+            Red bars increase fraud risk; green bars pull towards legitimacy.
+          </p>
+          <div class="shap-bar-container" id="shapBarContainer"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         PAGE 4: ANALYST REVIEW QUEUE
+         ==================================================================== -->
+    <section id="reviewPane" class="tab-pane" role="tabpanel">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Analyst Investigation & Review Queue</h2>
+          <p>Triage flagged suspicious transactions, record dispositions, and maintain audit trails.</p>
+        </div>
+        <button id="refreshQueueBtn" class="btn secondary">🔄 Refresh Queue</button>
+      </div>
+
+      <!-- Pending Suspicious Transactions Queue -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Pending High-Risk Incidents</h3>
+          <span class="badge fraud" id="pendingQueueCount">0 Pending</span>
+        </div>
+        <div class="table-responsive">
+          <table id="pendingQueueTable">
+            <thead>
+              <tr>
+                <th>Txn ID</th>
+                <th>Amount ($)</th>
+                <th>Merchant</th>
+                <th>Card Type</th>
+                <th>Time Period</th>
+                <th>Investigation Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="text-align:center;">No pending investigations.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Historical Dispositions Audit Log -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Resolved Dispositions Audit Log (analyst_reviews)</h3>
+        </div>
+        <div class="table-responsive">
+          <table id="resolvedReviewsTable">
+            <thead>
+              <tr>
+                <th>Review ID</th>
+                <th>Txn ID</th>
+                <th>Amount ($)</th>
+                <th>Decision</th>
+                <th>Reviewer</th>
+                <th>Notes</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" style="text-align:center;">Loading review logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Review Action Confirmation Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size:18px;" id="reviewModalTitle">Confirm Review Decision</h3>
+        <button id="closeReviewModalBtn" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      <p id="reviewModalDesc" style="font-size:13px; color:var(--text-muted); margin-bottom:14px;"></p>
+      <form id="reviewActionForm">
+        <input type="hidden" id="revTxnId" />
+        <input type="hidden" id="revAmount" />
+        <input type="hidden" id="revDecision" />
+        <div class="form-group" style="margin-bottom:16px;">
+          <label for="revNotes">Investigation Findings & Notes</label>
+          <textarea id="revNotes" rows="3" placeholder="Enter findings, verification calls, or rationale..."></textarea>
+        </div>
+        <button type="submit" class="btn" id="confirmReviewSubmitBtn" style="width:100%;">Submit Disposition</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>
+      Credit Card Fraud Detection Portal &copy; 2026 – Data Mining and Data Warehousing Course Project.
+      Built with Python, Scikit-Learn, Random Forest, FastAPI, and Chart.js.
+      <br/>
+      <em>* Note: Merchant category and Card type dimensions are simulated (seed=42) for realistic real-time monitoring demonstration.</em>
+    </p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
